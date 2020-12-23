@@ -6,33 +6,50 @@ from aqt.utils import showInfo
 from aqt.qt import *
 
 import json 
+from datetime import datetime
+
 
 # We're going to add a menu item below. First we want to create a function to
 # be called when the menu item is activated.
 
 def testFunction():
-    # get the number of cards in the current collection, which is stored in
-    # the main window
-    # cardCount = mw.col.cardCount()
     ids = mw.col.find_cards("added:1")
-    # showInfo(typeof(cards))
     tiddlers=[]
     for id in ids:     
-        # show a message box
-        # showInfo("Card count: %d" % cardCount)
-        # showInfo("Card question: "+str(card.question))
+
+        #get the question from the card
         question = mw.col.getCard(id).render_output().question_text
-        # question = card.q()
-        # showInfo(question)
+        
+        #parse the timestamp from anki card and format to tiddlywiki form
+        date = datetime.fromtimestamp((id/1000)-28800)
+        date = str(date)
+        dayMonthYear =date.split()[0]
+        dayMonthYear = dayMonthYear.split("-")
+        time = date.split()[1]
+        time = time.split(".")[0]
+        time = time.split(":")
+        created=""
+        created += dayMonthYear[0]
+        created += dayMonthYear[1]
+        created += dayMonthYear[2]
+        created += time[0]
+        created += time[1]
+        created += time[2]
+        created += "000"
+
+        #format python dict
         tiddler = {
             "text": "",
             "title": question,
-            "created": id,
+            "created": created,
+            "tags":"review"
         }
         tiddlers.append(tiddler)
-        # print(card.question)
+
+    #write to json file
     with open('/home/ristirianto/Downloads/anki.json', 'w') as outfile:
         json.dump(tiddlers, outfile)
+
     showInfo("ok")
 
 # create a new menu item, "test"
